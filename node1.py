@@ -1,6 +1,3 @@
-# node1.py - Object Detection Publisher
-# Detects "board_shield" using YOLOv8 and publishes center-X coordinates via ZMQ
-
 import cv2
 import zmq
 import json
@@ -15,20 +12,23 @@ class ObjectDetectionNode:
         self.setup_zmq()
         self.setup_model()
         self.setup_camera()
+        
         signal.signal(signal.SIGINT, self.signal_handler)
-
+        
     def setup_zmq(self):
+        """Initialize ZMQ publisher"""
         try:
             self.context = zmq.Context()
             self.publisher = self.context.socket(zmq.PUB)
             self.publisher.bind("tcp://0.0.0.0:5555")
             print("✅ ZMQ Publisher bound to tcp://0.0.0.0:5555")
-            time.sleep(0.5)
+            time.sleep(0.5)  
         except Exception as e:
             print(f"❌ ZMQ setup failed: {e}")
             sys.exit(1)
-
+            
     def setup_model(self):
+        """Load YOLOv8 model"""
         try:
             self.model = YOLO("best.pt")
             print("✅ YOLOv8 model 'best.pt' loaded successfully")
@@ -36,18 +36,23 @@ class ObjectDetectionNode:
             print(f"❌ Model loading failed: {e}")
             print("💡 Ensure 'best.pt' exists in the current directory")
             sys.exit(1)
-
+            
     def setup_camera(self):
+        """Initialize camera with proper settings"""
         try:
-            self.cap = cv2.VideoCapture(1)  # เปลี่ยนจาก 1 เป็น 0 หากภาพเพี้ยน
+            self.cap = cv2.VideoCapture(0)
             if not self.cap.isOpened():
                 raise Exception("Cannot open camera")
+                
+            # Set camera properties
             self.cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
             self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
             self.cap.set(cv2.CAP_PROP_FPS, 30)
+            
             print("✅ Camera initialized (640x480)")
         except Exception as e:
             print(f"❌ Camera setup failed: {e}")
+            print("💡 Check if camera is connected and not used by another app")
             sys.exit(1)
     
     def signal_handler(self, sig, frame):
