@@ -1,0 +1,8 @@
+cd
+.\venv\Scripts\activate
+python .\node1.py
+python .\node2.py
+
+python .\pub_json.py
+python .\sub_json.py
+python .\servo_control.py
